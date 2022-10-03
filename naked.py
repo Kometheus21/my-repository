@@ -94,6 +94,24 @@ def push_asteroids_arrays_to_db(request_day, ast_array, hazardous):
 		else:
 			logger.debug("Asteroid already IN DB")
 
+# Sorts the asteroids by their miss distance in ascending order
+def sort_ast_by_pass_dist(ast_arr):
+	if len(ast_arr) > 0:
+		min_len = 1000000
+		max_len = -1
+		for val in ast_arr:
+			if len(val) > max_len:
+				max_len = len(val)
+			if len(val) < min_len:
+				min_len = len(val)
+		if min_len == max_len and min_len >= 10:
+			ast_arr.sort(key = lambda x: x[8], reverse=False)
+			return ast_arr
+		else:
+			return []
+	else:
+		return []
+
 if __name__ == "__main__":
 
 	connection = None
@@ -126,11 +144,11 @@ if __name__ == "__main__":
 	# Requests data about asteroids passing earth today by sending todays data and the API key to the nasa API endpoint
 	r = requests.get(nasa_api_url + "rest/v1/feed?start_date=" + request_date + "&end_date=" + request_date + "&api_key=" + nasa_api_key)
 
-	# Prints out the status code of the request
+	# Logs out the status code of the request
 	logger.debug("Response status code: " + str(r.status_code))
-	# Prints out the headers of the request
+	# Logs out the headers of the request
 	logger.debug("Response headers: " + str(r.headers))
-	# Prints out the content of the response in unicode
+	# Logs out the content of the response in unicode
 	logger.debug("Response content: " + str(r.text))
 
 	# The following will be executed if the response was successful
@@ -148,7 +166,7 @@ if __name__ == "__main__":
 		if 'element_count' in json_data:
 			# Assigns the asteroid count of that day to a variable
 			ast_count = int(json_data['element_count'])
-			# Prints out the asteroid count of that day
+			# Logs out the asteroid count of that day
 			logger.info("Asteroid count today: " + str(ast_count))
 
 			# Checks if there are any asteroids to process
@@ -209,11 +227,11 @@ if __name__ == "__main__":
 
 						# Used to separate asteroids in the print out
 						logger.info("------------------------------------------------------- >>")
-						# Prints out the asteroids name, the url leading to its description, its minimum and maximum diameter and if it is hazardous or not
+						# Logs out the asteroids name, the url leading to its description, its minimum and maximum diameter and if it is hazardous or not
 						logger.info("Asteroid name: " + str(tmp_ast_name) + " | INFO: " + str(tmp_ast_nasa_jpl_url) + " | Diameter: " + str(tmp_ast_diam_min) + " - " + str(tmp_ast_diam_max) + " km | Hazardous: " + str(tmp_ast_hazardous))
-						# Prints out the asteroids close approach distance, the time of it in UTC and local
+						# Logs out the asteroids close approach distance, the time of it in UTC and local
 						logger.info("Close approach TS: " + str(tmp_ast_close_appr_ts) + " | Date/time UTC TZ: " + str(tmp_ast_close_appr_dt_utc) + " | Local TZ: " + str(tmp_ast_close_appr_dt))
-						# Prints out the asteroids speed and the distance it will miss Earth by
+						# Logs out the asteroids speed and the distance it will miss Earth by
 						logger.info("Speed: " + str(tmp_ast_speed) + " km/h" + " | MISS distance: " + str(tmp_ast_miss_dist) + " km")
 						
 						# Adding asteroid data to the corresponding array
@@ -225,30 +243,28 @@ if __name__ == "__main__":
 			else:
 				logger.info("No asteroids are going to hit earth today")
 
-		# Prints out how many asteroids are in each array
+		# Logs out how many asteroids are in each array
 		logger.info("Hazardous asteorids: " + str(len(ast_hazardous)) + " | Safe asteroids: " + str(len(ast_safe)))
 
 		if len(ast_hazardous) > 0:
-
 			# Sorts the asteroids by the time of its close approach
 			ast_hazardous.sort(key = lambda x: x[4], reverse=False)
 
 			logger.info("Today's possible apocalypse (asteroid impact on earth) times:")
 			# Cycles through the values in the ast_hazardous array
 			for asteroid in ast_hazardous:
-				# Prints out an asteroids date and time of close approach in local time, its name and a url to its description
+				# Logs out an asteroids date and time of close approach in local time, its name and a url to its description
 				logger.info(str(asteroid[6]) + " " + str(asteroid[0]) + " " + " | more info: " + str(asteroid[1]))
 
 			# Sorts the asteroids by their miss distance in ascending order
-			ast_hazardous.sort(key = lambda x: x[8], reverse=False)
-			# Sorts the asteroids name, its miss distance and a url to its description
+			ast_hazardous = sort_ast_by_pass_dist(ast_hazardous)
+			# Logs the asteroids name, its miss distance and a url to its description
 			logger.info("Closest passing distance is for: " + str(ast_hazardous[0][0]) + " at: " + str(int(ast_hazardous[0][8])) + " km | more info: " + str(ast_hazardous[0][1]))
-			push_asteroids_arrays_to_db(request_date, ast_hazardous, 1)
+			
 		else:
 			logger.info("No asteroids close passing earth today")
-		
-		if len(ast_hazardous) > 0:
-			push_asteroids_arrays_to_db(request_date, ast_safe, 0)
 
+		push_asteroids_arrays_to_db(request_date, ast_hazardous, 1)
+		push_asteroids_arrays_to_db(request_date, ast_safe, 0)
 	else:
 		logger.error("Unable to get response from API. Response code: " + str(r.status_code) + " | content: " + str(r.text))
