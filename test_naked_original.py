@@ -34,5 +34,15 @@ assert records[0][0] > 0
 print("OK")
 print("----------")
 
+#Checking if number of local migration files is equal to the number of migrations in the migration table
+print("Checking if number of local migration files is equal to the number of migrations in the migration table")
+dir = '/home/s158/my-repository/migrations/'
+file_count = (len([name for name in os.listdir(dir)if name.endswith(".sql") if os.path.isfile(os.path.join(dir, name))]))
+result = cursor.execute("SELECT count(*) FROM migrations")
+id_count = cursor.fetchall()
+assert id_count[0][0] == file_count
+print("OK")
+print("----------")
+
 print("Database migration test DONE -> All OK")
 print("----------")
