@@ -25,21 +25,21 @@ $python_exec_loc test_config.py
 if [ $? -eq 0 ]; then echo "OK"; else echo "Configuration test FAILED"; exit 1; fi
 echo "------------------------------------------------"
 
-echo "Running asteroid worker test"
-$python_exec_loc test_naked.py
-if [ $? -eq 0 ]; then echo "OK"; else echo "Worker test FAILED"; exit 1; fi
-echo "------------------------------------------------"
-
 echo "Running DB migrations"
 $python_exec_loc migrate_db.py
 if [ $? -eq 0 ]; then echo "OK"; else echo "DB migration FAILED"; exit 1; fi
 echo "------------------------------------------------"
 
 echo "Running DB migration test"
-$python_exec_loc test_naked_original.py
+$python_exec_loc test_migrate_db.py
 if [ $? -eq 0 ]; then echo "OK"; else echo "DB migration test FAILED"; exit 1; fi
 echo "------------------------------------------------"
 
-echo "ALL TEST OK"
+echo "Running asteroid worker test"
+$python_exec_loc test_naked.py
+if [ $? -eq 0 ]; then echo "OK"; else echo "Worker test FAILED"; exit 1; fi
+echo "------------------------------------------------"
+
+echo "ALL TESTS OK"
 echo "Running asteroid worker:"
 $python_exec_loc naked.py
