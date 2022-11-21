@@ -175,55 +175,83 @@ if __name__ == "__main__":
 				for val in json_data['near_earth_objects'][request_date]:
 					# Checks if certain variables are present in the value that is being looped through
 					if 'name' and 'nasa_jpl_url' and 'estimated_diameter' and 'is_potentially_hazardous_asteroid' and 'close_approach_data' in val:
+						logger.debug("------------------------------------------------------- >>") #My logger addition
 						# Assigning the name of the asteroid to a variable
 						tmp_ast_name = val['name']
+						logger.debug('Name of hazardojus asteroid: ' + tmp_ast_name) #My logger addition
 						# Assigning the url of an asteroids description to a variable
 						tmp_ast_nasa_jpl_url = val['nasa_jpl_url']
+						logger.debug('Hazardojus asteroid url: ' + tmp_ast_nasa_jpl_url) #My logger addition
 						# Assigns the id of an asteroid to a variable
 						tmp_ast_id = val['id']
+						logger.debug('Hazardojus asteroid id: ' + tmp_ast_id) #My logger addition
 						# Assigns minimum and maximum diameter of asteroids to variables
 						if 'kilometers' in val['estimated_diameter']:
+							logger.debug("------------------------------------------------------- >>") #My logger addition
 							if 'estimated_diameter_min' and 'estimated_diameter_max' in val['estimated_diameter']['kilometers']:
 								tmp_ast_diam_min = round(val['estimated_diameter']['kilometers']['estimated_diameter_min'], 3)
+								logger.debug('Min asteroid diameter: ' + str(tmp_ast_diam_min)) #My logger addition
 								tmp_ast_diam_max = round(val['estimated_diameter']['kilometers']['estimated_diameter_max'], 3)
+								logger.debug('Max asteroid diameter: ' + str(tmp_ast_diam_max)) #My logger addition
 							else:
 								tmp_ast_diam_min = -2
+								logger.error('Min asteroid diameter: ' + str(tmp_ast_diam_min)) #My logger addition
 								tmp_ast_diam_max = -2
+								logger.error('Max asteroid diameter: ' + str(tmp_ast_diam_max)) #My logger addition
 						else:
 							tmp_ast_diam_min = -1
+							logger.error('Min asteroid diameter: ' + str(tmp_ast_diam_min)) #My logger addition
 							tmp_ast_diam_max = -1
+							logger.error('Max asteroid diameter: ' + str(tmp_ast_diam_max)) #My logger addition
 
 						# Assigns tha value of "is_potentially_hazardous_asteroid" to a variable
 						tmp_ast_hazardous = val['is_potentially_hazardous_asteroid']
+						logger.debug('Hazardous: ' + str(tmp_ast_hazardous)) #My logger addition
 
 						# Checks if there are any "close_approach_data" values in the data
 						if len(val['close_approach_data']) > 0:
+							logger.debug("------------------------------------------------------- >>") #My logger addition
 							# Assigns data about an asteroids close approach, its speed and its miss distance to variables
 							if 'epoch_date_close_approach' and 'relative_velocity' and 'miss_distance' in val['close_approach_data'][0]:
 								tmp_ast_close_appr_ts = int(val['close_approach_data'][0]['epoch_date_close_approach']/1000)
+								logger.debug('Close approach TS: ' + str(tmp_ast_close_appr_ts)) #My logger addition
 								tmp_ast_close_appr_dt_utc = datetime.utcfromtimestamp(tmp_ast_close_appr_ts).strftime('%Y-%m-%d %H:%M:%S')
+								logger.debug('Date/time UTC TZ: ' + str(tmp_ast_close_appr_dt_utc)) #My logger addition
 								tmp_ast_close_appr_dt = datetime.fromtimestamp(tmp_ast_close_appr_ts).strftime('%Y-%m-%d %H:%M:%S')
+								logger.debug('Local TZ: ' + str(tmp_ast_close_appr_dt_utc)) #My logger addition
 
 								if 'kilometers_per_hour' in val['close_approach_data'][0]['relative_velocity']:
 									tmp_ast_speed = int(float(val['close_approach_data'][0]['relative_velocity']['kilometers_per_hour']))
+									logger.debug('Speed: ' + str(tmp_ast_speed)) #My logger addition
 								else:
 									tmp_ast_speed = -1
+									logger.error('Speed: ' + str(tmp_ast_speed)) #My logger addition
 
 								if 'kilometers' in val['close_approach_data'][0]['miss_distance']:
 									tmp_ast_miss_dist = round(float(val['close_approach_data'][0]['miss_distance']['kilometers']), 3)
+									logger.debug('Miss distance: ' + str(tmp_ast_miss_dist)) #My logger addition
 								else:
 									tmp_ast_miss_dist = -1
+									logger.error('Miss distance: ' + str(tmp_ast_miss_dist)) #My logger addition
 							else:
 								tmp_ast_close_appr_ts = -1
+								logger.error('Close approach TS: ' + str(tmp_ast_close_appr_ts)) #My logger addition
 								tmp_ast_close_appr_dt_utc = "1969-12-31 23:59:59"
+								logger.error('Date/time UTC TZ: ' + str(tmp_ast_close_appr_dt_utc)) #My logger addition
 								tmp_ast_close_appr_dt = "1969-12-31 23:59:59"
+								logger.error('Local TZ: ' + str(tmp_ast_close_appr_dt_utc)) #My logger addition
 						else:
 							logger.warning("No close approach data in message")
 							tmp_ast_close_appr_ts = 0
+							logger.error('Close approach TS: ' + str(tmp_ast_close_appr_ts)) #My logger addition
 							tmp_ast_close_appr_dt_utc = "1970-01-01 00:00:00"
+							logger.error('Date/time UTC TZ: ' + str(tmp_ast_close_appr_dt_utc)) #My logger addition
 							tmp_ast_close_appr_dt = "1970-01-01 00:00:00"
+							logger.error('Local TZ: ' + str(tmp_ast_close_appr_dt_utc)) #My logger addition
 							tmp_ast_speed = -1
+							logger.error('Speed: ' + str(tmp_ast_speed)) #My logger addition
 							tmp_ast_miss_dist = -1
+							logger.error('Miss distance: ' + str(tmp_ast_miss_dist)) #My logger addition
 
 						# Used to separate asteroids in the print out
 						logger.info("------------------------------------------------------- >>")
